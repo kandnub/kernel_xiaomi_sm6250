@@ -1201,7 +1201,6 @@ static void sdhci_msm_set_mmc_drv_type(struct sdhci_host *host, u32 opcode,
 
 int sdhci_msm_execute_tuning(struct sdhci_host *host, u32 opcode)
 {
-	struct sdhci_host *host = mmc_priv(mmc);
 	int tuning_seq_cnt = 10;
 	u8 phase, *data_buf, tuned_phases[NUM_TUNING_PHASES], tuned_phase_cnt = 0;
 	unsigned long flags;

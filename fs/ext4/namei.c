@@ -1468,7 +1468,7 @@ int ext4_search_dir(struct buffer_head *bh, char *search_buf, int buf_size,
 			/* found a match - just to be sure, do
 			 * a full check */
 			if (ext4_check_dir_entry(dir, NULL, de, bh, search_buf,
-						 buf_size, offset))
+						 buf_size, lblk, offset))
 				return -1;
 			*res_dir = de;
 			return 1;
@@ -2588,7 +2588,7 @@ int ext4_generic_delete_entry(handle_t *handle,
 	de = (struct ext4_dir_entry_2 *)entry_buf;
 	while (i < buf_size - csum_size) {
 		if (ext4_check_dir_entry(dir, NULL, de, bh,
-					 entry_buf, buf_size, i))
+					 entry_buf, buf_size, lblk, i))
 			return -EFSCORRUPTED;
 		if (de == de_del)  {
 			if (pde)
@@ -3504,7 +3504,7 @@ static int ext4_link(struct dentry *old_dentry,
 	if (inode->i_nlink >= EXT4_LINK_MAX)
 		return -EMLINK;
 
-	if (ext4_encrypted_inode(dir) &&
+	if (IS_ENCRYPTED(dir) &&
 			!fscrypt_has_permitted_context(dir, inode))
 		return -EXDEV;
 
@@ -3844,7 +3844,7 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		goto end_rename;
 
 	if ((old.dir != new.dir) &&
-	    ext4_encrypted_inode(new.dir) &&
+	    IS_ENCRYPTED(new.dir) &&
 	    !fscrypt_has_permitted_context(new.dir, old.inode)) {
 		retval = -EXDEV;
 		goto end_rename;
@@ -4015,14 +4015,14 @@ static int ext4_cross_rename(struct inode *old_dir, struct dentry *old_dentry,
 	int retval;
 	struct timespec ctime;
 
-	if ((ext4_encrypted_inode(old_dir) &&
+	if ((IS_ENCRYPTED(old_dir) &&
 	     !fscrypt_has_encryption_key(old_dir)) ||
-	    (ext4_encrypted_inode(new_dir) &&
+	    (IS_ENCRYPTED(new_dir) &&
 	     !fscrypt_has_encryption_key(new_dir)))
 		return -ENOKEY;
 
-	if ((ext4_encrypted_inode(old_dir) ||
-	     ext4_encrypted_inode(new_dir)) &&
+	if ((IS_ENCRYPTED(old_dir) ||
+	     IS_ENCRYPTED(new_dir)) &&
 	    (old_dir != new_dir) &&
 	    (!fscrypt_has_permitted_context(new_dir, old.inode) ||
 	     !fscrypt_has_permitted_context(old_dir, new.inode)))
